@@ -22,22 +22,12 @@ export interface ParamsResourceSpreadsheetsValuesBatchget {
 
 export interface GoogleSheetApisProps {
       /**
-       * @description the ID of the key
-       */
-      keyId: string;
-
-      /**
        * @description value of key
        */
-      key: string;
+      private_key: string;
 
       /**
        * @description service account email address.
        */
-      email: string;
-
-      /**
-       * @description list of requested scopes or a single scope.
-       */
-      scopes: string[] | string;
+      client_email: string;
 }

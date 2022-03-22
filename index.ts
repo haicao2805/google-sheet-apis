@@ -8,19 +8,16 @@ export class GoogleSheetApis {
 
       constructor(props: GoogleSheetApisProps) {
             this.auth = new google.auth.JWT({
-                  keyId: props.keyId,
-                  key: props.key,
-                  email: props.email,
-                  scopes: props.scopes,
+                  key: props.private_key,
+                  email: props.client_email,
+                  scopes: 'https://www.googleapis.com/auth/spreadsheets',
             });
             this.sheets = google.sheets('v4');
       }
 
       /**
        *
-       * @description
-       * @param params
-       * @returns
+       * @description get data from spreadsheet
        */
       public async getData(params: ParamsResourceSpreadsheetsValuesBatchget) {
             try {
@@ -29,9 +26,22 @@ export class GoogleSheetApis {
                         ranges: [`${params.tabName}!${params.startColumn}:${params.endColumn}`],
                         auth: this.auth,
                   });
+
                   return result.data.valueRanges[0].values as string[][];
             } catch (e) {
-                  return null;
+                  const message = (e as Error).message;
+                  switch (message) {
+                        case 'Requested entity was not found.':
+                              throw new Error('The spreadsheet ID was not found.');
+                        case 'error:0909006C:PEM routines:get_name:no start line':
+                              throw new Error('Invalid private key.');
+                        case 'invalid_grant: Invalid grant: account not found':
+                              throw new Error('Invalid client email.');
+                        case `Unable to parse range: ${params.tabName}!A:F`:
+                              throw new Error('Invalid tab name.');
+                        default:
+                              throw new Error(message);
+                  }
             }
       }
 }
